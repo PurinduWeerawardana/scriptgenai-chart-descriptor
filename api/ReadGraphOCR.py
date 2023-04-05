@@ -393,10 +393,10 @@ def axisLines(filePath, i):
         lowest_value_pixel = (lowest_value1+lowest_value2)/2
 
 def checkChartType(filePath):
-    model = keras.models.load_model("Chart_Classification_79.h5")
+    model = keras.models.load_model("newModel.h5")
     
     # Load and preprocess the image
-    img = Image.open(filePath)
+    img = Image.open(filePath).convert('RGBA')
     img = img.resize((300, 300))
     x = np.array(img)
     x = x[:, :, :3]  # Remove the 4th channel
@@ -411,7 +411,7 @@ def checkChartType(filePath):
 
     # Get the class labels from the generator
     class_labels = {'Line Chart': 0, 'Multi Line Chart': 1,
-                    'Pie Chart': 2, 'Vertical Bar Chart': 3}
+                    'Pie Chart': 2, 'Random': 3,'Vertical Bar Chart': 4}
     class_labels = {v: k for k, v in class_labels.items()}
     
     predicted_probabilities = preds[0]
@@ -423,16 +423,17 @@ def checkChartType(filePath):
     max_probability = predicted_probabilities[class_idx]
     max_probability_percentage = max_probability * 100
 
-    print(max_probability_percentage)
-    if(max_probability_percentage > 90.0):
+    if(max_probability_percentage>90.0):
         if(chartType == "Vertical Bar Chart"):
             axisLines(filePath, 1)
             return tablecoords
-            
+        elif(chartType == "Random"):
+            return "False"
+    
         else:
+        
             otherChart(filePath)
             return resultotherGraph
-     
     else:
         return "False"
 
