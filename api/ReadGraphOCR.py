@@ -30,8 +30,6 @@ def otherChart(filePath):
     resultotherGraph = ocr.ocr(filePath, cls=True)
     resultotherGraph = str(resultotherGraph)
     resultotherGraph = resultotherGraph + " \nAbove Coordinates are for a "+ chartType
-    
-
 
 def createTable(line_start_point, yvalue_list):
 
@@ -277,12 +275,6 @@ def axisLines(filePath, i):
     if abs(slope2) < 0.1 or abs(slope2) > 10:
         cv2.line(img, (left_line[0], left_line[1]),
                  (left_line[2], left_line[3]), (0, 0, 255), 2)
-    # cv2.imwrite(r"result.png", img) #can remove the extention
-
-    # Create a dataset using the bottomline
-    # bottom_line_file = open("position.txt", 'a')
-    # bottom_line_file.writelines(file_Name+","+ str(bottom_line)+"\n")
-    # bottom_line_file.close()
 
     dataOCR(left_line, bottom_line, top_border_line, filePath)
 
@@ -300,6 +292,8 @@ def axisLines(filePath, i):
     marked_y = 0
     min_dist = 1000000
     closest_edges = []
+    titley = sorted(title_boxes, key=lambda x: x[1][1])
+    first_cont = 0
     for c in contours:
         x, y, w, h = cv2.boundingRect(c)
         rect = cv2.boxPoints(cv2.minAreaRect(c))
@@ -341,7 +335,6 @@ def axisLines(filePath, i):
 
                         if not inside_box:
                             line_start_point = (j, i)
-                            # cv2.line(img, line_start_point, (j-2000, i), (255, 0, 255), 1) #Draw the horizontal pink line
                             if i != marked_y:  # only print if y position is different
                                 marked_y = i
 
@@ -351,7 +344,7 @@ def axisLines(filePath, i):
                                     img[i, j] = [0, 0, 255]
                                     dist = ((j - center_x)**2 +
                                             (i - center_y)**2)**0.5
-                                    # dist_to_text = ((j - bottom_txts[0][0])**2 + (i - bottom_txts[0])**2)**0.5
+
                                     closest_edges.append((j, i, dist))
 
                                     # add the position to the set of marked positions
@@ -363,8 +356,17 @@ def axisLines(filePath, i):
                                     marked_positions.add((j, i+3))
                                     marked_positions.add((j, i+1))
 
-                                    # print(closest_edges)
-                                    # Draw the horizontal pink line
+                                    ltx = titley[1][0][0]
+                                    rtx = titley[1][1][0]
+                                    lty = titley[1][0][1] 
+                                    lby = titley[1][3][1] 
+
+                                    if(first_cont != 0):
+
+                                        if not(lty-5 <= i <= lby+5 and ltx-50 <= j <= rtx): #margin
+                                            calculatingYValue(line_start_point, xintersection, yintersection, left_boxes, left_txts)
+                                    else:
+                                        first_cont = 1
 
                             # Check if the starting point of the line is not inside the bounding boxes
 
@@ -435,10 +437,7 @@ def checkChartType(filePath):
      
     else:
         return "False"
-
     
-
-
 def readGraph(filePath):
     return checkChartType(filePath)
 
